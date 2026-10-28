@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lot Size Finder</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f2f2f2; margin: 0; padding: 20px; }
+  .card { max-width: 420px; margin: 0 auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  .title { background: #f1c40f; padding: 12px; font-weight: bold; font-size: 18px; }
+  .row { display: flex; border-bottom: 1px solid #ddd; }
+  .label { flex: 1; background: #8e92b5; padding: 12px; font-weight: bold; }
+  .value { flex: 1; display: flex; }
+  .value input, .value output { width: 100%; box-sizing: border-box; padding: 12px; border: 0; text-align: right; font-size: 16px; background: #fff; }
+  .value input:focus { outline: 2px solid #4a90d9; }
+  .result .value output { background: #57b80f; font-weight: bold; }
+  .msg { background: #5b9bd5; color: #f1c40f; text-align: center; font-size: 26px; font-weight: bold; padding: 30px 10px; }
+</style>
+<meta name="theme-color" content="#f1c40f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+<div class="card">
+  <div class="title">Lot Size Finder</div>
+
+  <div class="row"><div class="label">Account balance</div>
+    <div class="value"><input id="balance" type="number" step="any" value="5000"></div></div>
+
+  <div class="row"><div class="label">Risk%</div>
+    <div class="value"><input id="riskPct" type="number" step="any" value="0.25"></div></div>
+
+  <div class="row"><div class="label">Risk Amount</div>
+    <div class="value"><output id="riskAmt">12.5</output></div></div>
+
+  <div class="row"><div class="label">SL on 0.01</div>
+    <div class="value"><input id="sl" type="number" step="any" value="3"></div></div>
+
+  <div class="row result"><div class="label">Lot Size</div>
+    <div class="value"><output id="lot">0.04</output></div></div>
+
+  <div class="msg">Good luck to me 👍😎</div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  function calculate() {
+    const balance = parseFloat($('balance').value) || 0;
+    const riskPct = parseFloat($('riskPct').value) || 0;
+    const sl = parseFloat($('sl').value) || 0;
+
+    // Risk Amount = input1 * (input2 / 100)
+    const riskAmount = balance * (riskPct / 100);
+    $('riskAmt').value = +riskAmount.toFixed(4);
+
+    // Lot Size = ROUNDDOWN((Risk Amount / input3) * 0.01, 2)
+    let lot = 0;
+    if (sl > 0) {
+      const raw = (riskAmount / sl) * 0.01;
+      lot = Math.floor(raw * 100 + 1e-9) / 100;
+    }
+    $('lot').value = lot.toFixed(2);
+  }
+
+  ['balance', 'riskPct', 'sl'].forEach(id => $(id).addEventListener('input', calculate));
+  calculate();
+</script>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+</script>
+</body>
+</html>
